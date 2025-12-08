@@ -283,3 +283,63 @@ If a plugin isn't loading after manual installation:
 2. Run: `Object.keys(app.plugins.manifests)` to see detected plugins
 3. Run: `app.plugins.manifests['your-plugin-id']` to see manifest details
 4. If manifest is detected but plugin doesn't load, check the export pattern in `main.js`
+
+---
+
+## Lesson 8: Community Plugin Submission Checklist
+
+### Before Submission
+
+**1. Verify all URLs are correct:**
+- `manifest.json` → `authorUrl` should point to your GitHub profile or repo
+- `manifest.json` → `fundingUrl` should be a working payment link
+- Settings panel links should use the full repo URL (e.g., `structured-navigator-plugin` not `structured-navigator`)
+- README links should match actual repo name
+
+**2. Create a GitHub Release:**
+Obsidian pulls plugin files from GitHub Releases, not from the repo directly.
+
+1. Go to your repo → Releases → "Create a new release"
+2. Create a new tag matching your `manifest.json` version (e.g., `0.1.0`)
+3. **Attach these files** to the release (not in the repo, attached to the release):
+   - `main.js`
+   - `manifest.json`
+   - `styles.css` (if you have one)
+4. Publish the release
+
+**3. Test manual installation:**
+Before submitting, test that someone can manually install your plugin:
+1. Download the release files
+2. Create folder in `.obsidian/plugins/your-plugin-id/`
+3. Copy the files into that folder
+4. Restart Obsidian
+5. Enable the plugin in Settings → Community Plugins
+6. Verify it works
+
+**4. Submit to obsidian-releases:**
+1. Fork [obsidian-releases](https://github.com/obsidianmd/obsidian-releases)
+2. Edit `community-plugins.json` - add your plugin entry:
+   ```json
+   {
+     "id": "your-plugin-id",
+     "name": "Your Plugin Name",
+     "author": "Your Name",
+     "description": "Brief description",
+     "repo": "username/repo-name"
+   }
+   ```
+3. Create a PR to the main repo
+
+### Common Rejection Reasons
+- Plugin ID contains "obsidian"
+- `console.log` statements in production code
+- Using `innerHTML` instead of `createEl()`
+- Missing LICENSE file
+- Broken links in manifest or settings
+- Release files not attached to GitHub Release
+- Title case instead of sentence case in UI
+
+### References
+- [Submit your plugin](https://docs.obsidian.md/Plugins/Releasing/Submit+your+plugin)
+- [Plugin Guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines)
+- [Community Plugins Repo](https://github.com/obsidianmd/obsidian-releases)
