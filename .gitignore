@@ -1,0 +1,19 @@
+# npm
+node_modules/
+
+# Build output (keep main.js for releases, but ignore during dev)
+# main.js
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Obsidian
+data.json

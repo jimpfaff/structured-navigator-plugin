@@ -1,0 +1,49 @@
+/* Structured Navigator styles */
+
+.structured-nav {
+	margin: 1em 0;
+}
+
+.structured-nav-title {
+	font-weight: var(--font-semibold);
+	margin-bottom: 0.5em;
+}
+
+.structured-nav-list {
+	margin: 0;
+	padding-left: 1.5em;
+}
+
+.structured-nav-list li {
+	margin: 0.2em 0;
+}
+
+.structured-nav-link {
+	cursor: pointer;
+	text-decoration: none;
+	color: var(--link-color);
+}
+
+.structured-nav-link:hover {
+	text-decoration: underline;
+	color: var(--link-color-hover);
+}
+
+.structured-nav-inline {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.structured-nav-delimiter {
+	color: var(--text-muted);
+}
+
+.structured-nav-empty {
+	color: var(--text-muted);
+	font-style: italic;
+}
+
+.structured-nav-error {
+	color: var(--text-error);
+}
