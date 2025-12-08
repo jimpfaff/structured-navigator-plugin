@@ -1,6 +1,6 @@
 import { MarkdownRenderChild, MarkdownView } from 'obsidian';
 import type StructuredNavigatorPlugin from './main';
-import { NavSettings } from './types';
+import { NavSettings, NavBlockConfig, mergeConfig } from './types';
 import { parseHeadings, filterHeadings } from './parser';
 import { renderTOC } from './renderer';
 
@@ -9,18 +9,18 @@ import { renderTOC } from './renderer';
  */
 export class NavComponent extends MarkdownRenderChild {
 	plugin: StructuredNavigatorPlugin;
-	config: NavSettings;
+	blockConfig: NavBlockConfig;
 	sourcePath: string;
 
 	constructor(
 		containerEl: HTMLElement,
 		plugin: StructuredNavigatorPlugin,
-		config: NavSettings,
+		blockConfig: NavBlockConfig,
 		sourcePath: string
 	) {
 		super(containerEl);
 		this.plugin = plugin;
-		this.config = config;
+		this.blockConfig = blockConfig;
 		this.sourcePath = sourcePath;
 	}
 
@@ -35,18 +35,34 @@ export class NavComponent extends MarkdownRenderChild {
 				}
 			})
 		);
+
+		// Listen for settings changes to re-render with new defaults
+		this.registerEvent(
+			// @ts-ignore - custom event
+			this.plugin.app.workspace.on('structured-navigator:settings-changed', () => {
+				this.render();
+			})
+		);
+	}
+
+	/**
+	 * Get current config by merging block overrides with current plugin settings
+	 */
+	private getConfig(): NavSettings {
+		return mergeConfig(this.plugin.settings, this.blockConfig);
 	}
 
 	render(): void {
+		const config = this.getConfig();
 		const cache = this.plugin.app.metadataCache.getCache(this.sourcePath);
 		const allHeadings = parseHeadings(cache);
 		const filteredHeadings = filterHeadings(
 			allHeadings,
-			this.config.minDepth,
-			this.config.maxDepth
+			config.minDepth,
+			config.maxDepth
 		);
 
-		renderTOC(filteredHeadings, this.config, this.containerEl);
+		renderTOC(filteredHeadings, config, this.containerEl);
 		this.attachClickHandlers();
 	}
 

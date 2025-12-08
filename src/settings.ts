@@ -14,11 +14,6 @@ export class SettingsTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl('p', {
-			text: 'Note: Changes to these settings require reloading Obsidian to take effect on existing nav blocks.',
-			cls: 'setting-item-description'
-		});
-
 		new Setting(containerEl)
 			.setName('Default style')
 			.setDesc('How to render the table of contents')

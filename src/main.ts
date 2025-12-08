@@ -1,5 +1,5 @@
-import { Plugin, MarkdownPostProcessorContext, parseYaml } from 'obsidian';
-import { NavSettings, NavBlockConfig, DEFAULT_SETTINGS, mergeConfig } from './types';
+import { Plugin, MarkdownPostProcessorContext, MarkdownView, parseYaml } from 'obsidian';
+import { NavSettings, NavBlockConfig, DEFAULT_SETTINGS } from './types';
 import { SettingsTab } from './settings';
 import { NavComponent } from './nav-component';
 
@@ -38,11 +38,9 @@ export default class StructuredNavigatorPlugin extends Plugin {
 			}
 		}
 
-		// Merge block config with plugin defaults
-		const config = mergeConfig(this.settings, blockConfig);
-
 		// Create component for lifecycle management
-		const component = new NavComponent(el, this, config, ctx.sourcePath);
+		// Pass blockConfig only - component will merge with current settings at render time
+		const component = new NavComponent(el, this, blockConfig, ctx.sourcePath);
 		ctx.addChild(component);
 	}
 
@@ -52,5 +50,7 @@ export default class StructuredNavigatorPlugin extends Plugin {
 
 	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
+		// Trigger event for nav components to re-render
+		this.app.workspace.trigger('structured-navigator:settings-changed');
 	}
 }

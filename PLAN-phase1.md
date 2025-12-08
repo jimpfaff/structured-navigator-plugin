@@ -711,3 +711,33 @@ Once Phase 1 is complete and stable:
 
 - **Configurable default title in settings**: Allow users to set their own default title (e.g., "Contents", "Outline", etc.) instead of hardcoded "Table of Contents". Can also add option to hide title by default.
 - **Custom bullet symbols**: Add fun symbol options beyond standard bullets (→, ▸, ◆, ★, ✓, ●, ○) or let users define their own via `bullet_symbol: "→"` option.
+
+---
+
+## Technical Notes
+
+### Settings Refresh Behavior
+
+Using custom workspace events to refresh nav blocks when settings change:
+
+```typescript
+// In saveSettings():
+this.app.workspace.trigger('structured-navigator:settings-changed');
+
+// In NavComponent.onload():
+this.registerEvent(
+  this.plugin.app.workspace.on('structured-navigator:settings-changed', () => {
+    this.render();
+  })
+);
+```
+
+**Key insight:** NavComponent stores only the block-specific overrides (`blockConfig`), not the merged config. At render time, it merges with current `plugin.settings`. This allows settings changes to take effect immediately.
+
+**References:**
+- [Refresh all open Markdown views? - Obsidian Forum](https://forum.obsidian.md/t/refresh-all-open-markdown-views/38912)
+- [Re-render markdown codeblock processor example - GitHub](https://github.com/Zachatoo/obsidian-rerender-markdown-codeblock-processor-example)
+
+**What didn't work:**
+- `app.workspace.updateOptions()` - only for CodeMirror extensions, doesn't re-render code block processors
+- `view.previewMode?.rerender(true)` - didn't trigger our code block processor

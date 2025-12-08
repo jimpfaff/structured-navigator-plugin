@@ -56,10 +56,6 @@ var SettingsTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    containerEl.createEl("p", {
-      text: "Note: Changes to these settings require reloading Obsidian to take effect on existing nav blocks.",
-      cls: "setting-item-description"
-    });
     new import_obsidian.Setting(containerEl).setName("Default style").setDesc("How to render the table of contents").addDropdown((dropdown) => dropdown.addOption("bullet", "Bullet list").addOption("number", "Numbered (1, 2, 3)").addOption("decimal", "Decimal (1.1, 1.2.1)").addOption("outline", "Traditional (I, A, 1, a)").addOption("inline", "Inline (single line)").setValue(this.plugin.settings.style).onChange(async (value) => {
       this.plugin.settings.style = value;
       await this.plugin.saveSettings();
@@ -186,10 +182,10 @@ function renderInline(headings, config, containerEl) {
 
 // src/nav-component.ts
 var NavComponent = class extends import_obsidian2.MarkdownRenderChild {
-  constructor(containerEl, plugin, config, sourcePath) {
+  constructor(containerEl, plugin, blockConfig, sourcePath) {
     super(containerEl);
     this.plugin = plugin;
-    this.config = config;
+    this.blockConfig = blockConfig;
     this.sourcePath = sourcePath;
   }
   onload() {
@@ -201,16 +197,29 @@ var NavComponent = class extends import_obsidian2.MarkdownRenderChild {
         }
       })
     );
+    this.registerEvent(
+      // @ts-ignore - custom event
+      this.plugin.app.workspace.on("structured-navigator:settings-changed", () => {
+        this.render();
+      })
+    );
+  }
+  /**
+   * Get current config by merging block overrides with current plugin settings
+   */
+  getConfig() {
+    return mergeConfig(this.plugin.settings, this.blockConfig);
   }
   render() {
+    const config = this.getConfig();
     const cache = this.plugin.app.metadataCache.getCache(this.sourcePath);
     const allHeadings = parseHeadings(cache);
     const filteredHeadings = filterHeadings(
       allHeadings,
-      this.config.minDepth,
-      this.config.maxDepth
+      config.minDepth,
+      config.maxDepth
     );
-    renderTOC(filteredHeadings, this.config, this.containerEl);
+    renderTOC(filteredHeadings, config, this.containerEl);
     this.attachClickHandlers();
   }
   attachClickHandlers() {
@@ -257,8 +266,7 @@ var StructuredNavigatorPlugin = class extends import_obsidian3.Plugin {
         return;
       }
     }
-    const config = mergeConfig(this.settings, blockConfig);
-    const component = new NavComponent(el, this, config, ctx.sourcePath);
+    const component = new NavComponent(el, this, blockConfig, ctx.sourcePath);
     ctx.addChild(component);
   }
   async loadSettings() {
@@ -266,5 +274,6 @@ var StructuredNavigatorPlugin = class extends import_obsidian3.Plugin {
   }
   async saveSettings() {
     await this.saveData(this.settings);
+    this.app.workspace.trigger("structured-navigator:settings-changed");
   }
 };
