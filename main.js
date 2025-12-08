@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use strict";
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -58,6 +59,23 @@ var SettingsTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
+    containerEl.createEl("p", {
+      text: "Generate dynamic tables of contents from your document headings.",
+      cls: "setting-item-description"
+    });
+    const linksDiv = containerEl.createDiv({ cls: "structured-nav-settings-links" });
+    const docLink = linksDiv.createEl("a", {
+      text: "Documentation",
+      href: "https://github.com/jimpfaff/structured-navigator"
+    });
+    docLink.setAttr("target", "_blank");
+    linksDiv.createSpan({ text: " \u2022 " });
+    const supportLink = linksDiv.createEl("a", {
+      text: "Support this plugin",
+      href: "https://www.paypal.com/ncp/payment/U37GNNWBVN4RY"
+    });
+    supportLink.setAttr("target", "_blank");
+    containerEl.createEl("hr");
     new import_obsidian.Setting(containerEl).setName("Default style").setDesc("How to render the table of contents").addDropdown((dropdown) => dropdown.addOption("bullet", "Bullet list").addOption("number", "Numbered (1, 2, 3)").addOption("decimal", "Decimal (1.1, 1.2.1)").addOption("outline", "Traditional (I, A, 1, a)").addOption("inline", "Inline (single line)").setValue(this.plugin.settings.style).onChange(async (value) => {
       this.plugin.settings.style = value;
       await this.plugin.saveSettings();
@@ -364,3 +382,4 @@ var StructuredNavigatorPlugin = class extends import_obsidian3.Plugin {
     this.app.workspace.trigger("structured-navigator:settings-changed");
   }
 };
+module.exports = module.exports.default;

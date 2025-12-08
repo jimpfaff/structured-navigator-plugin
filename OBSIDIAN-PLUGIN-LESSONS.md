@@ -231,3 +231,55 @@ while (stack[stack.length - 1].level > targetLevel) {
 ```
 
 This ensures siblings at the same heading level are added to the same list, so numbering increments correctly (a, b, c instead of a, a, a).
+
+---
+
+## Lesson 7: esbuild Export Fix for Obsidian Plugins
+
+### Problem
+After manual installation (copying `main.js`, `manifest.json`, `styles.css` to the plugin folder), Obsidian detects the plugin but it doesn't load. No errors appear in the console - the plugin is simply never attempted to load.
+
+### Root Cause
+TypeScript's `export default class` combined with esbuild's CommonJS output creates:
+```javascript
+module.exports = __toCommonJS(main_exports);
+// which results in: module.exports.default = PluginClass
+```
+
+But Obsidian expects:
+```javascript
+module.exports = PluginClass  // Plugin class directly on module.exports
+```
+
+### Solution
+Add a `footer` to esbuild config that reassigns the default export:
+
+```javascript
+// esbuild.config.mjs
+const context = await esbuild.context({
+  // ... other options
+  format: "cjs",
+  outfile: "main.js",
+  banner: {
+    js: "/* eslint-disable */",
+  },
+  footer: {
+    js: "module.exports = module.exports.default;",
+  },
+});
+```
+
+### How to Verify
+Check the end of your built `main.js`:
+```javascript
+// Should end with:
+};
+module.exports = module.exports.default;
+```
+
+### Debugging Tips
+If a plugin isn't loading after manual installation:
+1. Open Developer Console (`Ctrl+Shift+I`)
+2. Run: `Object.keys(app.plugins.manifests)` to see detected plugins
+3. Run: `app.plugins.manifests['your-plugin-id']` to see manifest details
+4. If manifest is detected but plugin doesn't load, check the export pattern in `main.js`

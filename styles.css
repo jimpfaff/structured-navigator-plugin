@@ -158,3 +158,16 @@ ol.structured-nav-outline > li > ol > li > ol > li > ol > li > ol > li > ol > li
 .structured-nav-hidden-marker {
 	display: none;
 }
+
+/* Settings panel links */
+.structured-nav-settings-links {
+	margin-bottom: 1em;
+}
+
+.structured-nav-settings-links a {
+	color: var(--link-color);
+}
+
+.structured-nav-settings-links a:hover {
+	color: var(--link-color-hover);
+}

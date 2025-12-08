@@ -29,6 +29,12 @@ const context = await esbuild.context({
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
 	outfile: "main.js",
+	banner: {
+		js: "/* eslint-disable */",
+	},
+	footer: {
+		js: "module.exports = module.exports.default;",
+	},
 });
 
 if (prod) {

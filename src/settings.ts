@@ -14,6 +14,30 @@ export class SettingsTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
+		// Header with links
+		containerEl.createEl('p', {
+			text: 'Generate dynamic tables of contents from your document headings.',
+			cls: 'setting-item-description'
+		});
+
+		const linksDiv = containerEl.createDiv({ cls: 'structured-nav-settings-links' });
+
+		const docLink = linksDiv.createEl('a', {
+			text: 'Documentation',
+			href: 'https://github.com/jimpfaff/structured-navigator'
+		});
+		docLink.setAttr('target', '_blank');
+
+		linksDiv.createSpan({ text: ' • ' });
+
+		const supportLink = linksDiv.createEl('a', {
+			text: 'Support this plugin',
+			href: 'https://www.paypal.com/ncp/payment/U37GNNWBVN4RY'
+		});
+		supportLink.setAttr('target', '_blank');
+
+		containerEl.createEl('hr');
+
 		new Setting(containerEl)
 			.setName('Default style')
 			.setDesc('How to render the table of contents')
