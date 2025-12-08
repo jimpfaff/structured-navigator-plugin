@@ -1,7 +1,7 @@
-import { MarkdownRenderChild, MarkdownView } from 'obsidian';
+import { MarkdownRenderChild, MarkdownView, TFile } from 'obsidian';
 import type StructuredNavigatorPlugin from './main';
 import { NavSettings, NavBlockConfig, mergeConfig } from './types';
-import { parseHeadings, filterHeadings } from './parser';
+import { parseHeadings, parseHeadingsWithRefs, filterHeadings } from './parser';
 import { renderTOC } from './renderer';
 
 /**
@@ -52,10 +52,24 @@ export class NavComponent extends MarkdownRenderChild {
 		return mergeConfig(this.plugin.settings, this.blockConfig);
 	}
 
-	render(): void {
+	async render(): Promise<void> {
 		const config = this.getConfig();
 		const cache = this.plugin.app.metadataCache.getCache(this.sourcePath);
-		const allHeadings = parseHeadings(cache);
+
+		// Get file content for parsing refs if refs are enabled
+		let allHeadings;
+		if (config.refs === 'show') {
+			const file = this.plugin.app.vault.getAbstractFileByPath(this.sourcePath);
+			if (file instanceof TFile) {
+				const content = await this.plugin.app.vault.cachedRead(file);
+				allHeadings = parseHeadingsWithRefs(cache, content);
+			} else {
+				allHeadings = parseHeadings(cache);
+			}
+		} else {
+			allHeadings = parseHeadings(cache);
+		}
+
 		const filteredHeadings = filterHeadings(
 			allHeadings,
 			config.minDepth,
@@ -67,6 +81,7 @@ export class NavComponent extends MarkdownRenderChild {
 	}
 
 	attachClickHandlers(): void {
+		// Heading links - scroll to line
 		this.containerEl.querySelectorAll('.structured-nav-link').forEach(link => {
 			link.addEventListener('click', (e) => {
 				e.preventDefault();
@@ -76,6 +91,25 @@ export class NavComponent extends MarkdownRenderChild {
 				}
 			});
 		});
+
+		// Ref links - open referenced note
+		this.containerEl.querySelectorAll('.structured-nav-ref-link').forEach(link => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				const refPath = (link as HTMLElement).dataset.refPath;
+				if (refPath) {
+					this.openNote(refPath);
+				}
+			});
+		});
+	}
+
+	openNote(notePath: string): void {
+		// Try to find the file in the vault
+		const file = this.plugin.app.metadataCache.getFirstLinkpathDest(notePath, this.sourcePath);
+		if (file) {
+			this.plugin.app.workspace.getLeaf().openFile(file);
+		}
 	}
 
 	scrollToLine(line: number): void {

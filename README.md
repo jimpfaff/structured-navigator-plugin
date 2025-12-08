@@ -8,23 +8,35 @@ A dynamic table of contents plugin for [Obsidian](https://obsidian.md) that gene
 - **Nested hierarchy** matching your heading structure (H2 → H3 → H4, etc.)
 - **Multiple styles**: bullet, numbered, decimal outline, traditional outline, or inline
 - **Custom bullet symbols**: arrows, triangles, diamonds, stars, and more
+- **Cross-note references**: link related notes from headings with `+[[Note]]` syntax
 - **Depth filtering**: control which heading levels appear
 - **Live updates**: TOC refreshes automatically when you edit headings or change settings
 - **Click to navigate**: jump to any heading in your document
 
 ## Installation
 
+### From Community Plugins
+
+1. Open **Settings → Community plugins**
+2. Click **Browse** and search for "Structured Navigator"
+3. Click **Install**, then **Enable**
+
 ### Manual Installation
 
-1. Download `main.js`, `manifest.json`, and `styles.css` from the latest release
-2. Create a folder called `structured-navigator` in your vault's `.obsidian/plugins/` directory
-3. Copy the downloaded files into that folder
-4. Reload Obsidian
-5. Enable "Structured Navigator" in Settings → Community plugins
+If the plugin isn't yet available in the Community Plugins browser, or you want to install a specific version:
 
-### From Community Plugins (Coming Soon)
+1. Go to the [Releases](https://github.com/jimpfaff/structured-navigator-plugin/releases) page
+2. Download these three files from the latest release:
+   - `main.js`
+   - `manifest.json`
+   - `styles.css`
+3. In your vault, navigate to `.obsidian/plugins/` (create the `plugins` folder if it doesn't exist)
+4. Create a new folder called `structured-navigator`
+5. Copy the three downloaded files into the `structured-navigator` folder
+6. Restart Obsidian (or close and reopen your vault)
+7. Go to **Settings → Community plugins** and enable "Structured Navigator"
 
-Once published, you'll be able to install directly from Obsidian's Community Plugins browser.
+> **Note**: You may need to disable "Restricted mode" in Community plugins settings to enable third-party plugins.
 
 ## Usage
 
@@ -58,6 +70,7 @@ title: Contents
 | `title` | any text | `Table of Contents` | Title displayed above the TOC |
 | `delimiter` | any text | ` \| ` | Separator for inline style |
 | `bullet_symbol` | any symbol | (default bullet) | Custom bullet symbol for bullet style |
+| `refs` | `show`, `hide` | `show` | Show/hide cross-note references |
 
 ### List Styles
 
@@ -145,6 +158,50 @@ title: ""
 ```
 ````
 
+## Cross-Note References
+
+Add references to other notes after your headings using the `+[[Note]]` syntax:
+
+```markdown
+## Introduction +[[Background]] +[[Related Work]]
+
+## Methods +[[Methodology Guide|Guide]]
+
+## Results
+```
+
+The TOC will display these references as clickable links after each heading:
+
+```
+• Introduction → Background, Related Work
+• Methods → Guide
+• Results
+```
+
+Clicking a reference opens that note in your vault.
+
+### Reference Syntax
+
+| Syntax | Description |
+|--------|-------------|
+| `+[[Note]]` | Link to a note, displays note name |
+| `+[[Note\|Display]]` | Link to a note with custom display text |
+
+### Configuration
+
+Control reference display with the `refs` option:
+
+````markdown
+```nav
+refs: show
+```
+````
+
+| Value | Description |
+|-------|-------------|
+| `show` | Display cross-note references (default) |
+| `hide` | Hide references in TOC |
+
 ## Settings
 
 Configure default values in **Settings → Structured Navigator**:
@@ -156,6 +213,7 @@ Configure default values in **Settings → Structured Navigator**:
 | **Maximum heading depth** | Default maximum heading level to include |
 | **Inline delimiter** | Default separator for inline style |
 | **Bullet symbol** | Choose from preset symbols (→, ▸, ◆, ★, ✓, ○, ▪) or use default |
+| **Cross-note references** | Show or hide `+[[Note]]` references in TOC |
 
 Settings changes take effect immediately on all nav blocks—no need to reload Obsidian.
 
@@ -177,7 +235,7 @@ Settings changes take effect immediately on all nav blocks—no need to reload O
 
 ## Roadmap
 
-- [ ] Cross-note references (`@[[Note]]` syntax)
+- [x] Cross-note references (`+[[Note]]` syntax)
 - [ ] Quick links (`-- [[Note]]` syntax)
 - [ ] Scoped TOCs (show only part of a document)
 - [ ] Presets for reusable configurations
@@ -187,7 +245,7 @@ Settings changes take effect immediately on all nav blocks—no need to reload O
 
 If you find this plugin useful, consider supporting development:
 
-[![PayPal](https://img.shields.io/badge/PayPal-Support-blue)](https://www.paypal.com/ncp/payment/U37GNNWBVN4RY)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=for-the-badge&logo=buy-me-a-coffee)](https://www.paypal.com/ncp/payment/U37GNNWBVN4RY)
 
 ## License
 

@@ -80,5 +80,17 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.bulletSymbol = value;
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl)
+			.setName('Cross-note references')
+			.setDesc('Show +[[Note]] references after headings in the TOC')
+			.addDropdown(dropdown => dropdown
+				.addOption('show', 'Show references')
+				.addOption('hide', 'Hide references')
+				.setValue(this.plugin.settings.refs)
+				.onChange(async (value) => {
+					this.plugin.settings.refs = value as NavSettings['refs'];
+					await this.plugin.saveSettings();
+				}));
 	}
 }

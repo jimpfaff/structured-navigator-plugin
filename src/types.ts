@@ -5,6 +5,8 @@ export type NavStyle =
 	| 'outline'
 	| 'inline';
 
+export type RefsDisplay = 'show' | 'hide';
+
 export interface NavSettings {
 	style: NavStyle;
 	minDepth: number;
@@ -12,6 +14,7 @@ export interface NavSettings {
 	title: string;
 	delimiter: string;
 	bulletSymbol: string;
+	refs: RefsDisplay;
 }
 
 export interface NavBlockConfig {
@@ -21,12 +24,19 @@ export interface NavBlockConfig {
 	title?: string;
 	delimiter?: string;
 	bullet_symbol?: string;
+	refs?: RefsDisplay;
+}
+
+export interface NoteRef {
+	path: string;
+	display?: string;
 }
 
 export interface HeadingItem {
 	level: number;
 	heading: string;
 	line: number;
+	refs: NoteRef[];
 }
 
 export const DEFAULT_SETTINGS: NavSettings = {
@@ -35,7 +45,8 @@ export const DEFAULT_SETTINGS: NavSettings = {
 	maxDepth: 6,
 	title: 'Table of Contents',
 	delimiter: ' | ',
-	bulletSymbol: ''
+	bulletSymbol: '',
+	refs: 'show'
 };
 
 /**
@@ -49,5 +60,6 @@ export function mergeConfig(settings: NavSettings, block: NavBlockConfig): NavSe
 		title: block.title ?? settings.title,
 		delimiter: block.delimiter ?? settings.delimiter,
 		bulletSymbol: block.bullet_symbol ?? settings.bulletSymbol,
+		refs: block.refs ?? settings.refs,
 	};
 }

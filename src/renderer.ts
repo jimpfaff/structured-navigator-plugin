@@ -1,4 +1,4 @@
-import { HeadingItem, NavSettings } from './types';
+import { HeadingItem, NavSettings, NoteRef } from './types';
 
 /**
  * Render TOC as HTML elements
@@ -94,6 +94,11 @@ function renderList(
 		});
 		link.dataset.line = String(heading.line);
 		link.dataset.heading = heading.heading;
+
+		// Render refs if present and enabled
+		if (config.refs === 'show' && heading.refs.length > 0) {
+			renderRefs(heading.refs, li);
+		}
 	}
 }
 
@@ -119,5 +124,29 @@ function renderInline(
 		});
 		link.dataset.line = String(heading.line);
 		link.dataset.heading = heading.heading;
+
+		// Render refs inline if present and enabled
+		if (config.refs === 'show' && heading.refs.length > 0) {
+			renderRefs(heading.refs, inlineEl);
+		}
+	});
+}
+
+/**
+ * Render cross-note references as small linked items
+ */
+function renderRefs(refs: NoteRef[], containerEl: HTMLElement): void {
+	const refsContainer = containerEl.createSpan({ cls: 'structured-nav-refs' });
+	refsContainer.createSpan({ text: ' → ', cls: 'structured-nav-refs-arrow' });
+
+	refs.forEach((ref, index) => {
+		if (index > 0) {
+			refsContainer.createSpan({ text: ', ', cls: 'structured-nav-refs-sep' });
+		}
+		const refLink = refsContainer.createEl('a', {
+			text: ref.display || ref.path,
+			cls: 'structured-nav-ref-link'
+		});
+		refLink.dataset.refPath = ref.path;
 	});
 }

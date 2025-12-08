@@ -32,17 +32,19 @@ var DEFAULT_SETTINGS = {
   maxDepth: 6,
   title: "Table of Contents",
   delimiter: " | ",
-  bulletSymbol: ""
+  bulletSymbol: "",
+  refs: "show"
 };
 function mergeConfig(settings, block) {
-  var _a, _b, _c, _d, _e, _f;
+  var _a, _b, _c, _d, _e, _f, _g;
   return {
     style: (_a = block.style) != null ? _a : settings.style,
     minDepth: (_b = block.min_depth) != null ? _b : settings.minDepth,
     maxDepth: (_c = block.max_depth) != null ? _c : settings.maxDepth,
     title: (_d = block.title) != null ? _d : settings.title,
     delimiter: (_e = block.delimiter) != null ? _e : settings.delimiter,
-    bulletSymbol: (_f = block.bullet_symbol) != null ? _f : settings.bulletSymbol
+    bulletSymbol: (_f = block.bullet_symbol) != null ? _f : settings.bulletSymbol,
+    refs: (_g = block.refs) != null ? _g : settings.refs
   };
 }
 
@@ -76,6 +78,10 @@ var SettingsTab = class extends import_obsidian.PluginSettingTab {
       this.plugin.settings.bulletSymbol = value;
       await this.plugin.saveSettings();
     }));
+    new import_obsidian.Setting(containerEl).setName("Cross-note references").setDesc("Show +[[Note]] references after headings in the TOC").addDropdown((dropdown) => dropdown.addOption("show", "Show references").addOption("hide", "Hide references").setValue(this.plugin.settings.refs).onChange(async (value) => {
+      this.plugin.settings.refs = value;
+      await this.plugin.saveSettings();
+    }));
   }
 };
 
@@ -83,6 +89,7 @@ var SettingsTab = class extends import_obsidian.PluginSettingTab {
 var import_obsidian2 = require("obsidian");
 
 // src/parser.ts
+var REF_PATTERN = /\+\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
 function parseHeadings(cache) {
   if (!(cache == null ? void 0 : cache.headings)) {
     return [];
@@ -90,8 +97,42 @@ function parseHeadings(cache) {
   return cache.headings.map((h) => ({
     level: h.level,
     heading: h.heading,
-    line: h.position.start.line
+    line: h.position.start.line,
+    refs: []
   }));
+}
+function parseHeadingsWithRefs(cache, fileContent) {
+  if (!(cache == null ? void 0 : cache.headings)) {
+    return [];
+  }
+  const lines = fileContent.split("\n");
+  return cache.headings.map((h) => {
+    const lineContent = lines[h.position.start.line] || "";
+    const refs = parseRefsFromLine(lineContent);
+    const cleanHeading = stripRefs(h.heading);
+    return {
+      level: h.level,
+      heading: cleanHeading,
+      line: h.position.start.line,
+      refs
+    };
+  });
+}
+function stripRefs(text) {
+  return text.replace(REF_PATTERN, "").trim();
+}
+function parseRefsFromLine(line) {
+  var _a;
+  const refs = [];
+  let match;
+  REF_PATTERN.lastIndex = 0;
+  while ((match = REF_PATTERN.exec(line)) !== null) {
+    refs.push({
+      path: match[1].trim(),
+      display: (_a = match[2]) == null ? void 0 : _a.trim()
+    });
+  }
+  return refs;
 }
 function filterHeadings(headings, minDepth, maxDepth) {
   return headings.filter((h) => h.level >= minDepth && h.level <= maxDepth);
@@ -160,6 +201,9 @@ function renderList(headings, config, containerEl) {
     });
     link.dataset.line = String(heading.line);
     link.dataset.heading = heading.heading;
+    if (config.refs === "show" && heading.refs.length > 0) {
+      renderRefs(heading.refs, li);
+    }
   }
 }
 function renderInline(headings, config, containerEl) {
@@ -177,6 +221,23 @@ function renderInline(headings, config, containerEl) {
     });
     link.dataset.line = String(heading.line);
     link.dataset.heading = heading.heading;
+    if (config.refs === "show" && heading.refs.length > 0) {
+      renderRefs(heading.refs, inlineEl);
+    }
+  });
+}
+function renderRefs(refs, containerEl) {
+  const refsContainer = containerEl.createSpan({ cls: "structured-nav-refs" });
+  refsContainer.createSpan({ text: " \u2192 ", cls: "structured-nav-refs-arrow" });
+  refs.forEach((ref, index) => {
+    if (index > 0) {
+      refsContainer.createSpan({ text: ", ", cls: "structured-nav-refs-sep" });
+    }
+    const refLink = refsContainer.createEl("a", {
+      text: ref.display || ref.path,
+      cls: "structured-nav-ref-link"
+    });
+    refLink.dataset.refPath = ref.path;
   });
 }
 
@@ -210,10 +271,21 @@ var NavComponent = class extends import_obsidian2.MarkdownRenderChild {
   getConfig() {
     return mergeConfig(this.plugin.settings, this.blockConfig);
   }
-  render() {
+  async render() {
     const config = this.getConfig();
     const cache = this.plugin.app.metadataCache.getCache(this.sourcePath);
-    const allHeadings = parseHeadings(cache);
+    let allHeadings;
+    if (config.refs === "show") {
+      const file = this.plugin.app.vault.getAbstractFileByPath(this.sourcePath);
+      if (file instanceof import_obsidian2.TFile) {
+        const content = await this.plugin.app.vault.cachedRead(file);
+        allHeadings = parseHeadingsWithRefs(cache, content);
+      } else {
+        allHeadings = parseHeadings(cache);
+      }
+    } else {
+      allHeadings = parseHeadings(cache);
+    }
     const filteredHeadings = filterHeadings(
       allHeadings,
       config.minDepth,
@@ -232,6 +304,21 @@ var NavComponent = class extends import_obsidian2.MarkdownRenderChild {
         }
       });
     });
+    this.containerEl.querySelectorAll(".structured-nav-ref-link").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const refPath = link.dataset.refPath;
+        if (refPath) {
+          this.openNote(refPath);
+        }
+      });
+    });
+  }
+  openNote(notePath) {
+    const file = this.plugin.app.metadataCache.getFirstLinkpathDest(notePath, this.sourcePath);
+    if (file) {
+      this.plugin.app.workspace.getLeaf().openFile(file);
+    }
   }
   scrollToLine(line) {
     const view = this.plugin.app.workspace.getActiveViewOfType(import_obsidian2.MarkdownView);

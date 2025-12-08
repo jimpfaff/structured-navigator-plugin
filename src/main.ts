@@ -1,4 +1,4 @@
-import { Plugin, MarkdownPostProcessorContext, MarkdownView, parseYaml } from 'obsidian';
+import { Plugin, MarkdownPostProcessorContext, parseYaml } from 'obsidian';
 import { NavSettings, NavBlockConfig, DEFAULT_SETTINGS } from './types';
 import { SettingsTab } from './settings';
 import { NavComponent } from './nav-component';

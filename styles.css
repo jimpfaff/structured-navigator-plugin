@@ -126,3 +126,35 @@ ol.structured-nav-outline > li > ol > li > ol > li > ol > li > ol > li > ol > li
 .structured-nav-error {
 	color: var(--text-error);
 }
+
+/* Cross-note references */
+.structured-nav-refs {
+	font-size: 0.85em;
+	color: var(--text-muted);
+}
+
+.structured-nav-refs-arrow {
+	color: var(--text-faint);
+}
+
+.structured-nav-refs-sep {
+	color: var(--text-faint);
+}
+
+.structured-nav-ref-link {
+	cursor: pointer;
+	text-decoration: none;
+	color: var(--link-color);
+	opacity: 0.8;
+}
+
+.structured-nav-ref-link:hover {
+	text-decoration: underline;
+	color: var(--link-color-hover);
+	opacity: 1;
+}
+
+/* Hide the + marker before cross-note reference links */
+.structured-nav-hidden-marker {
+	display: none;
+}
