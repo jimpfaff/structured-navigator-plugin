@@ -24,7 +24,7 @@ export class SettingsTab extends PluginSettingTab {
 
 		const docLink = linksDiv.createEl('a', {
 			text: 'Documentation',
-			href: 'https://github.com/jimpfaff/structured-navigator'
+			href: 'https://github.com/jimpfaff/structured-navigator-plugin'
 		});
 		docLink.setAttr('target', '_blank');
 

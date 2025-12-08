@@ -66,7 +66,7 @@ var SettingsTab = class extends import_obsidian.PluginSettingTab {
     const linksDiv = containerEl.createDiv({ cls: "structured-nav-settings-links" });
     const docLink = linksDiv.createEl("a", {
       text: "Documentation",
-      href: "https://github.com/jimpfaff/structured-navigator"
+      href: "https://github.com/jimpfaff/structured-navigator-plugin"
     });
     docLink.setAttr("target", "_blank");
     linksDiv.createSpan({ text: " \u2022 " });
