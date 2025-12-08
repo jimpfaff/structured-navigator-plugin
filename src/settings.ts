@@ -19,7 +19,9 @@ export class SettingsTab extends PluginSettingTab {
 			.setDesc('How to render the table of contents')
 			.addDropdown(dropdown => dropdown
 				.addOption('bullet', 'Bullet list')
-				.addOption('number', 'Numbered list')
+				.addOption('number', 'Numbered (1, 2, 3)')
+				.addOption('decimal', 'Decimal (1.1, 1.2.1)')
+				.addOption('outline', 'Traditional (I, A, 1, a)')
 				.addOption('inline', 'Inline (single line)')
 				.setValue(this.plugin.settings.style)
 				.onChange(async (value) => {

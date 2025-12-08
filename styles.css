@@ -5,8 +5,11 @@
 }
 
 .structured-nav-title {
-	font-weight: var(--font-semibold);
+	font-size: var(--h4-size, 1.1em);
+	font-weight: var(--h4-weight, 600);
+	color: var(--h4-color, var(--text-normal));
 	margin-bottom: 0.5em;
+	line-height: var(--h4-line-height, 1.4);
 }
 
 .structured-nav-list {
@@ -16,6 +19,71 @@
 
 .structured-nav-list li {
 	margin: 0.2em 0;
+}
+
+/* Number style: simple 1, 2, 3 at each level */
+ol.structured-nav-number {
+	list-style-type: decimal;
+}
+
+ol.structured-nav-number ol {
+	list-style-type: decimal;
+}
+
+/* Decimal style: hierarchical numbering (1.1, 1.1.1, etc.) */
+ol.structured-nav-decimal {
+	counter-reset: toc-counter;
+	list-style: none;
+	padding-left: 0;
+}
+
+ol.structured-nav-decimal li {
+	counter-increment: toc-counter;
+}
+
+ol.structured-nav-decimal li::before {
+	content: counters(toc-counter, ".") ". ";
+	color: var(--text-muted);
+}
+
+ol.structured-nav-decimal ol {
+	counter-reset: toc-counter;
+	list-style: none;
+	padding-left: 1.5em;
+}
+
+/* Traditional outline: I, A, 1, a, (1), (a) */
+ol.structured-nav-outline {
+	list-style-type: upper-roman;
+	padding-left: 2em;
+}
+
+ol.structured-nav-outline > li > ol {
+	list-style-type: upper-alpha;
+}
+
+ol.structured-nav-outline > li > ol > li > ol {
+	list-style-type: decimal;
+}
+
+ol.structured-nav-outline > li > ol > li > ol > li > ol {
+	list-style-type: lower-alpha;
+}
+
+ol.structured-nav-outline > li > ol > li > ol > li > ol > li > ol {
+	list-style: none;
+}
+
+ol.structured-nav-outline > li > ol > li > ol > li > ol > li > ol > li::before {
+	content: "(" counter(list-item) ") ";
+}
+
+ol.structured-nav-outline > li > ol > li > ol > li > ol > li > ol > li > ol {
+	list-style: none;
+}
+
+ol.structured-nav-outline > li > ol > li > ol > li > ol > li > ol > li > ol > li::before {
+	content: "(" counter(list-item, lower-alpha) ") ";
 }
 
 .structured-nav-link {
@@ -37,6 +105,7 @@
 
 .structured-nav-delimiter {
 	color: var(--text-muted);
+	white-space: pre;
 }
 
 .structured-nav-empty {

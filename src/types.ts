@@ -1,5 +1,12 @@
+export type NavStyle =
+	| 'bullet'
+	| 'number'
+	| 'decimal'
+	| 'outline'
+	| 'inline';
+
 export interface NavSettings {
-	style: 'bullet' | 'number' | 'inline';
+	style: NavStyle;
 	minDepth: number;
 	maxDepth: number;
 	title: string;
@@ -7,7 +14,7 @@ export interface NavSettings {
 }
 
 export interface NavBlockConfig {
-	style?: 'bullet' | 'number' | 'inline';
+	style?: NavStyle;
 	min_depth?: number;
 	max_depth?: number;
 	title?: string;
@@ -24,7 +31,7 @@ export const DEFAULT_SETTINGS: NavSettings = {
 	style: 'bullet',
 	minDepth: 1,
 	maxDepth: 6,
-	title: '',
+	title: 'Table of Contents',
 	delimiter: ' | '
 };
 

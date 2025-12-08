@@ -30,7 +30,7 @@ var DEFAULT_SETTINGS = {
   style: "bullet",
   minDepth: 1,
   maxDepth: 6,
-  title: "",
+  title: "Table of Contents",
   delimiter: " | "
 };
 function mergeConfig(settings, block) {
@@ -54,7 +54,7 @@ var SettingsTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
-    new import_obsidian.Setting(containerEl).setName("Default style").setDesc("How to render the table of contents").addDropdown((dropdown) => dropdown.addOption("bullet", "Bullet list").addOption("number", "Numbered list").addOption("inline", "Inline (single line)").setValue(this.plugin.settings.style).onChange(async (value) => {
+    new import_obsidian.Setting(containerEl).setName("Default style").setDesc("How to render the table of contents").addDropdown((dropdown) => dropdown.addOption("bullet", "Bullet list").addOption("number", "Numbered (1, 2, 3)").addOption("decimal", "Decimal (1.1, 1.2.1)").addOption("outline", "Traditional (I, A, 1, a)").addOption("inline", "Inline (single line)").setValue(this.plugin.settings.style).onChange(async (value) => {
       this.plugin.settings.style = value;
       await this.plugin.saveSettings();
     }));
@@ -115,15 +115,17 @@ function renderTOC(headings, config, containerEl) {
   }
 }
 function renderList(headings, config, containerEl) {
-  const listTag = config.style === "number" ? "ol" : "ul";
+  const useOrderedList = config.style !== "bullet";
+  const listTag = useOrderedList ? "ol" : "ul";
   const minLevel = Math.min(...headings.map((h) => h.level));
-  const rootList = containerEl.createEl(listTag, { cls: "structured-nav-list" });
+  const listClasses = ["structured-nav-list", `structured-nav-${config.style}`];
+  const rootList = containerEl.createEl(listTag, { cls: listClasses.join(" ") });
   const stack = [
     { list: rootList, lastLi: null, level: minLevel }
   ];
   for (const heading of headings) {
     const targetLevel = heading.level;
-    while (stack.length > 1 && stack[stack.length - 1].level >= targetLevel) {
+    while (stack.length > 1 && stack[stack.length - 1].level > targetLevel) {
       stack.pop();
     }
     while (stack[stack.length - 1].level < targetLevel) {
@@ -153,7 +155,8 @@ function renderInline(headings, config, containerEl) {
   const inlineEl = containerEl.createEl("div", { cls: "structured-nav-inline" });
   topLevel.forEach((heading, index) => {
     if (index > 0) {
-      inlineEl.createSpan({ text: config.delimiter, cls: "structured-nav-delimiter" });
+      const delimSpan = inlineEl.createSpan({ cls: "structured-nav-delimiter" });
+      delimSpan.textContent = config.delimiter;
     }
     const link = inlineEl.createEl("a", {
       text: heading.heading,

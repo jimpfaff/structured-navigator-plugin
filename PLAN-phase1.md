@@ -704,3 +704,10 @@ Once Phase 1 is complete and stable:
 2. **Phase 3:** Add `-- [[Note]]` quick link syntax
 3. **Phase 4:** Add scoping (start_after, end_before)
 4. **Phase 5:** Presets, [NAV] inline trigger, polish
+
+---
+
+## Future Enhancements (Noted During Development)
+
+- **Configurable default title in settings**: Allow users to set their own default title (e.g., "Contents", "Outline", etc.) instead of hardcoded "Table of Contents". Can also add option to hide title by default.
+- **Custom bullet symbols**: Add fun symbol options beyond standard bullets (→, ▸, ◆, ★, ✓, ●, ○) or let users define their own via `bullet_symbol: "→"` option.

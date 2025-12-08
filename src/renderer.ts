@@ -39,11 +39,13 @@ function renderList(
 	config: NavSettings,
 	containerEl: HTMLElement
 ): void {
-	const listTag = config.style === 'number' ? 'ol' : 'ul';
+	const useOrderedList = config.style !== 'bullet';
+	const listTag = useOrderedList ? 'ol' : 'ul';
 	const minLevel = Math.min(...headings.map(h => h.level));
 
-	// Build nested list structure
-	const rootList = containerEl.createEl(listTag, { cls: 'structured-nav-list' });
+	// Build nested list structure with style-specific class
+	const listClasses = ['structured-nav-list', `structured-nav-${config.style}`];
+	const rootList = containerEl.createEl(listTag, { cls: listClasses.join(' ') });
 
 	// Track: for each level, what's the current list and last li element
 	const stack: { list: HTMLElement; lastLi: HTMLElement | null; level: number }[] = [
@@ -53,8 +55,8 @@ function renderList(
 	for (const heading of headings) {
 		const targetLevel = heading.level;
 
-		// Go up: pop stack until we're at or above the target level
-		while (stack.length > 1 && stack[stack.length - 1].level >= targetLevel) {
+		// Go up: pop stack until we're at the target level or above
+		while (stack.length > 1 && stack[stack.length - 1].level > targetLevel) {
 			stack.pop();
 		}
 
@@ -98,7 +100,9 @@ function renderInline(
 
 	topLevel.forEach((heading, index) => {
 		if (index > 0) {
-			inlineEl.createSpan({ text: config.delimiter, cls: 'structured-nav-delimiter' });
+			// Use textContent and CSS white-space to preserve spaces
+			const delimSpan = inlineEl.createSpan({ cls: 'structured-nav-delimiter' });
+			delimSpan.textContent = config.delimiter;
 		}
 		const link = inlineEl.createEl('a', {
 			text: heading.heading,
