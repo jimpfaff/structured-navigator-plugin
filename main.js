@@ -31,16 +31,18 @@ var DEFAULT_SETTINGS = {
   minDepth: 1,
   maxDepth: 6,
   title: "Table of Contents",
-  delimiter: " | "
+  delimiter: " | ",
+  bulletSymbol: ""
 };
 function mergeConfig(settings, block) {
-  var _a, _b, _c, _d, _e;
+  var _a, _b, _c, _d, _e, _f;
   return {
     style: (_a = block.style) != null ? _a : settings.style,
     minDepth: (_b = block.min_depth) != null ? _b : settings.minDepth,
     maxDepth: (_c = block.max_depth) != null ? _c : settings.maxDepth,
     title: (_d = block.title) != null ? _d : settings.title,
-    delimiter: (_e = block.delimiter) != null ? _e : settings.delimiter
+    delimiter: (_e = block.delimiter) != null ? _e : settings.delimiter,
+    bulletSymbol: (_f = block.bullet_symbol) != null ? _f : settings.bulletSymbol
   };
 }
 
@@ -54,6 +56,10 @@ var SettingsTab = class extends import_obsidian.PluginSettingTab {
   display() {
     const { containerEl } = this;
     containerEl.empty();
+    containerEl.createEl("p", {
+      text: "Note: Changes to these settings require reloading Obsidian to take effect on existing nav blocks.",
+      cls: "setting-item-description"
+    });
     new import_obsidian.Setting(containerEl).setName("Default style").setDesc("How to render the table of contents").addDropdown((dropdown) => dropdown.addOption("bullet", "Bullet list").addOption("number", "Numbered (1, 2, 3)").addOption("decimal", "Decimal (1.1, 1.2.1)").addOption("outline", "Traditional (I, A, 1, a)").addOption("inline", "Inline (single line)").setValue(this.plugin.settings.style).onChange(async (value) => {
       this.plugin.settings.style = value;
       await this.plugin.saveSettings();
@@ -68,6 +74,10 @@ var SettingsTab = class extends import_obsidian.PluginSettingTab {
     }));
     new import_obsidian.Setting(containerEl).setName("Inline delimiter").setDesc('Separator for inline style (e.g., " | " or " \u2022 ")').addText((text) => text.setValue(this.plugin.settings.delimiter).onChange(async (value) => {
       this.plugin.settings.delimiter = value;
+      await this.plugin.saveSettings();
+    }));
+    new import_obsidian.Setting(containerEl).setName("Bullet symbol").setDesc("Symbol to use for bullet lists").addDropdown((dropdown) => dropdown.addOption("", "\u2022 Default").addOption("\u2192", "\u2192 Arrow").addOption("\u25B8", "\u25B8 Triangle").addOption("\u25C6", "\u25C6 Diamond").addOption("\u2605", "\u2605 Star").addOption("\u2713", "\u2713 Checkmark").addOption("\u25CB", "\u25CB Circle").addOption("\u25AA", "\u25AA Square").setValue(this.plugin.settings.bulletSymbol).onChange(async (value) => {
+      this.plugin.settings.bulletSymbol = value;
       await this.plugin.saveSettings();
     }));
   }
@@ -115,11 +125,18 @@ function renderTOC(headings, config, containerEl) {
   }
 }
 function renderList(headings, config, containerEl) {
+  const useCustomBullet = config.style === "bullet" && config.bulletSymbol;
   const useOrderedList = config.style !== "bullet";
   const listTag = useOrderedList ? "ol" : "ul";
   const minLevel = Math.min(...headings.map((h) => h.level));
   const listClasses = ["structured-nav-list", `structured-nav-${config.style}`];
+  if (useCustomBullet) {
+    listClasses.push("structured-nav-custom-bullet");
+  }
   const rootList = containerEl.createEl(listTag, { cls: listClasses.join(" ") });
+  if (useCustomBullet) {
+    rootList.style.setProperty("--bullet-symbol", `"${config.bulletSymbol} "`);
+  }
   const stack = [
     { list: rootList, lastLi: null, level: minLevel }
   ];

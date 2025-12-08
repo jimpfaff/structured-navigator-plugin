@@ -14,6 +14,11 @@ export class SettingsTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
+		containerEl.createEl('p', {
+			text: 'Note: Changes to these settings require reloading Obsidian to take effect on existing nav blocks.',
+			cls: 'setting-item-description'
+		});
+
 		new Setting(containerEl)
 			.setName('Default style')
 			.setDesc('How to render the table of contents')
@@ -60,6 +65,24 @@ export class SettingsTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.delimiter)
 				.onChange(async (value) => {
 					this.plugin.settings.delimiter = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Bullet symbol')
+			.setDesc('Symbol to use for bullet lists')
+			.addDropdown(dropdown => dropdown
+				.addOption('', '• Default')
+				.addOption('→', '→ Arrow')
+				.addOption('▸', '▸ Triangle')
+				.addOption('◆', '◆ Diamond')
+				.addOption('★', '★ Star')
+				.addOption('✓', '✓ Checkmark')
+				.addOption('○', '○ Circle')
+				.addOption('▪', '▪ Square')
+				.setValue(this.plugin.settings.bulletSymbol)
+				.onChange(async (value) => {
+					this.plugin.settings.bulletSymbol = value;
 					await this.plugin.saveSettings();
 				}));
 	}

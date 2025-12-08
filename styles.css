@@ -21,6 +21,16 @@
 	margin: 0.2em 0;
 }
 
+/* Custom bullet symbol */
+ul.structured-nav-custom-bullet,
+ul.structured-nav-custom-bullet ul {
+	list-style: none;
+}
+
+ul.structured-nav-custom-bullet li::before {
+	content: var(--bullet-symbol, "• ");
+}
+
 /* Number style: simple 1, 2, 3 at each level */
 ol.structured-nav-number {
 	list-style-type: decimal;

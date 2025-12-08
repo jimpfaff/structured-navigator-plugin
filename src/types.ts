@@ -11,6 +11,7 @@ export interface NavSettings {
 	maxDepth: number;
 	title: string;
 	delimiter: string;
+	bulletSymbol: string;
 }
 
 export interface NavBlockConfig {
@@ -19,6 +20,7 @@ export interface NavBlockConfig {
 	max_depth?: number;
 	title?: string;
 	delimiter?: string;
+	bullet_symbol?: string;
 }
 
 export interface HeadingItem {
@@ -32,7 +34,8 @@ export const DEFAULT_SETTINGS: NavSettings = {
 	minDepth: 1,
 	maxDepth: 6,
 	title: 'Table of Contents',
-	delimiter: ' | '
+	delimiter: ' | ',
+	bulletSymbol: ''
 };
 
 /**
@@ -45,5 +48,6 @@ export function mergeConfig(settings: NavSettings, block: NavBlockConfig): NavSe
 		maxDepth: block.max_depth ?? settings.maxDepth,
 		title: block.title ?? settings.title,
 		delimiter: block.delimiter ?? settings.delimiter,
+		bulletSymbol: block.bullet_symbol ?? settings.bulletSymbol,
 	};
 }

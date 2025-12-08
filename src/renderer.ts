@@ -39,13 +39,22 @@ function renderList(
 	config: NavSettings,
 	containerEl: HTMLElement
 ): void {
+	const useCustomBullet = config.style === 'bullet' && config.bulletSymbol;
 	const useOrderedList = config.style !== 'bullet';
 	const listTag = useOrderedList ? 'ol' : 'ul';
 	const minLevel = Math.min(...headings.map(h => h.level));
 
 	// Build nested list structure with style-specific class
 	const listClasses = ['structured-nav-list', `structured-nav-${config.style}`];
+	if (useCustomBullet) {
+		listClasses.push('structured-nav-custom-bullet');
+	}
 	const rootList = containerEl.createEl(listTag, { cls: listClasses.join(' ') });
+
+	// Set custom bullet symbol as CSS variable if specified
+	if (useCustomBullet) {
+		rootList.style.setProperty('--bullet-symbol', `"${config.bulletSymbol} "`);
+	}
 
 	// Track: for each level, what's the current list and last li element
 	const stack: { list: HTMLElement; lastLi: HTMLElement | null; level: number }[] = [
