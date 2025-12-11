@@ -171,3 +171,31 @@ ol.structured-nav-outline > li > ol > li > ol > li > ol > li > ol > li > ol > li
 .structured-nav-settings-links a:hover {
 	color: var(--link-color-hover);
 }
+
+/* Settings group - matches Obsidian 1.11+ native grouped settings style */
+/* Using #444444 for dark mode card background until SettingGroup API is available */
+.setting-item-group {
+	background-color: #444444;
+	border-radius: var(--radius-m, 8px);
+	padding: var(--size-4-3, 12px) var(--size-4-4, 16px);
+	margin-top: var(--size-4-4, 16px);
+}
+
+/* Light mode support */
+.theme-light .setting-item-group {
+	background-color: #e8e8e8;
+}
+
+/* Override Obsidian 1.11's per-item styling to create unified card */
+.setting-item-group > .setting-item,
+.setting-item-group .setting-item {
+	background: transparent !important;
+	background-color: transparent !important;
+	border-radius: 0 !important;
+	border: none !important;
+	border-top: none !important;
+	margin: 0 !important;
+	margin-top: 0 !important;
+	padding: var(--size-4-2, 8px) 0 !important;
+	box-shadow: none !important;
+}

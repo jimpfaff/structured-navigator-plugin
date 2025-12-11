@@ -23,13 +23,16 @@ npm run build
 
 ## Development Setup
 
-1. Symlink plugin to Obsidian vault for testing:
-   ```bash
-   # Windows (run as admin)
-   mklink /D "C:\path\to\vault\.obsidian\plugins\obsidian-structured-navigator" "C:\GitHub\toc-obsidian"
+**Test Vault:** `C:\GitHub\Obsidian-git-sync`
+**Plugin Location:** `C:\GitHub\Obsidian-git-sync\.obsidian\plugins\structured-navigator`
 
-   # macOS/Linux
-   ln -s /path/to/project /path/to/vault/.obsidian/plugins/obsidian-structured-navigator
+1. Create symlink from vault to dev folder (run as admin):
+   ```powershell
+   # Remove existing folder if present
+   Remove-Item 'C:\GitHub\Obsidian-git-sync\.obsidian\plugins\structured-navigator' -Recurse -ErrorAction SilentlyContinue
+
+   # Create junction (symlink)
+   New-Item -ItemType Junction -Path 'C:\GitHub\Obsidian-git-sync\.obsidian\plugins\structured-navigator' -Target 'C:\GitHub\toc-obsidian'
    ```
 
 2. Run `npm run dev` for watch mode
@@ -78,3 +81,20 @@ For community submission:
 - Test in both Reading Mode and Live Preview
 - Register `metadataCache.on('changed', ...)` for live TOC updates
 - Verify settings persist across Obsidian restarts
+
+## TODO: Obsidian 1.11 SettingGroup API
+
+Obsidian 1.11.0 announced a new `SettingGroup` API for organizing plugin settings into grouped cards with headers. As of December 2025, the API types have not been published to npm (still at 1.10.3).
+
+**Current workaround:** We manually create a `setting-item-group` div in `settings.ts` and style it with hardcoded colors in `styles.css` (`#444444` dark, `#e8e8e8` light).
+
+**When the API is available:**
+1. Run `npm update obsidian` to get the new types
+2. Check for `SettingGroup` class in `obsidian.d.ts`
+3. Refactor `settings.ts` to use the official API
+4. Remove hardcoded colors from `styles.css` in favor of native styling
+
+**Resources to monitor:**
+- https://github.com/obsidianmd/obsidian-api (for updated `obsidian.d.ts`)
+- https://docs.obsidian.md/Plugins/User+interface/Settings (for official documentation)
+- https://obsidian.md/changelog/ (for release notes)

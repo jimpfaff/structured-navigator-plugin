@@ -36,9 +36,10 @@ export class SettingsTab extends PluginSettingTab {
 		});
 		supportLink.setAttr('target', '_blank');
 
-		containerEl.createEl('hr');
+		// Display settings group
+		const displayGroup = this.createSettingGroup(containerEl);
 
-		new Setting(containerEl)
+		new Setting(displayGroup)
 			.setName('Default style')
 			.setDesc('How to render the table of contents')
 			.addDropdown(dropdown => dropdown
@@ -53,7 +54,7 @@ export class SettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		new Setting(containerEl)
+		new Setting(displayGroup)
 			.setName('Minimum heading depth')
 			.setDesc('Smallest heading level to include (1 = H1)')
 			.addSlider(slider => slider
@@ -65,7 +66,7 @@ export class SettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		new Setting(containerEl)
+		new Setting(displayGroup)
 			.setName('Maximum heading depth')
 			.setDesc('Largest heading level to include (6 = H6)')
 			.addSlider(slider => slider
@@ -77,7 +78,7 @@ export class SettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		new Setting(containerEl)
+		new Setting(displayGroup)
 			.setName('Inline delimiter')
 			.setDesc('Separator for inline style (e.g., " | " or " • ")')
 			.addText(text => text
@@ -87,7 +88,7 @@ export class SettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		new Setting(containerEl)
+		new Setting(displayGroup)
 			.setName('Bullet symbol')
 			.setDesc('Symbol to use for bullet lists')
 			.addDropdown(dropdown => dropdown
@@ -105,7 +106,7 @@ export class SettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
-		new Setting(containerEl)
+		new Setting(displayGroup)
 			.setName('Cross-note references')
 			.setDesc('Show +[[Note]] references after headings in the TOC')
 			.addDropdown(dropdown => dropdown
@@ -116,5 +117,9 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.refs = value as NavSettings['refs'];
 					await this.plugin.saveSettings();
 				}));
+	}
+
+	private createSettingGroup(containerEl: HTMLElement): HTMLElement {
+		return containerEl.createDiv({ cls: 'setting-item-group' });
 	}
 }
