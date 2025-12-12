@@ -1,6 +1,6 @@
 {
 	"name": "structured-navigator",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Dynamic table of contents with cross-note references and scoped views",
 	"main": "main.js",
 	"scripts": {

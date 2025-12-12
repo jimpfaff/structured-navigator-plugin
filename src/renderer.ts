@@ -99,6 +99,11 @@ function renderList(
 		if (config.refs === 'show' && heading.refs.length > 0) {
 			renderRefs(heading.refs, li);
 		}
+
+		// Render quick links as child items if present and enabled
+		if (config.quickLinks === 'show' && heading.quickLinks.length > 0) {
+			renderQuickLinks(heading.quickLinks, li, listTag, config.quickLinkPrefix);
+		}
 	}
 }
 
@@ -149,4 +154,33 @@ function renderRefs(refs: NoteRef[], containerEl: HTMLElement): void {
 		});
 		refLink.dataset.refPath = ref.path;
 	});
+}
+
+/**
+ * Render quick links as nested list items under a heading
+ * Quick links appear as children with a prefix (e.g., "→")
+ */
+function renderQuickLinks(
+	quickLinks: NoteRef[],
+	parentLi: HTMLElement,
+	listTag: 'ul' | 'ol',
+	prefix: string
+): void {
+	const nestedList = parentLi.createEl(listTag, { cls: 'structured-nav-quick-links' });
+
+	for (const link of quickLinks) {
+		const li = nestedList.createEl('li', { cls: 'structured-nav-quick-link-item' });
+
+		// Add prefix
+		if (prefix) {
+			li.createSpan({ text: prefix + ' ', cls: 'structured-nav-quick-link-prefix' });
+		}
+
+		// Add the link itself
+		const linkEl = li.createEl('a', {
+			text: link.display || link.path,
+			cls: 'structured-nav-quick-link'
+		});
+		linkEl.dataset.refPath = link.path;
+	}
 }

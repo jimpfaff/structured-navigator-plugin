@@ -117,6 +117,29 @@ export class SettingsTab extends PluginSettingTab {
 					this.plugin.settings.refs = value as NavSettings['refs'];
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(displayGroup)
+			.setName('Quick links')
+			.setDesc('Show -- [[Note]] quick links as TOC children')
+			.addDropdown(dropdown => dropdown
+				.addOption('show', 'Show quick links')
+				.addOption('hide', 'Hide quick links')
+				.setValue(this.plugin.settings.quickLinks)
+				.onChange(async (value) => {
+					this.plugin.settings.quickLinks = value as NavSettings['quickLinks'];
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(displayGroup)
+			.setName('Quick link prefix')
+			.setDesc('Symbol shown before quick links (e.g., "→" or "•")')
+			.addText(text => text
+				.setValue(this.plugin.settings.quickLinkPrefix)
+				.setPlaceholder('→')
+				.onChange(async (value) => {
+					this.plugin.settings.quickLinkPrefix = value;
+					await this.plugin.saveSettings();
+				}));
 	}
 
 	private createSettingGroup(containerEl: HTMLElement): HTMLElement {

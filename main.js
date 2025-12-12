@@ -34,10 +34,12 @@ var DEFAULT_SETTINGS = {
   title: "Table of Contents",
   delimiter: " | ",
   bulletSymbol: "",
-  refs: "show"
+  refs: "show",
+  quickLinks: "show",
+  quickLinkPrefix: "\u2192"
 };
 function mergeConfig(settings, block) {
-  var _a, _b, _c, _d, _e, _f, _g;
+  var _a, _b, _c, _d, _e, _f, _g, _h, _i;
   return {
     style: (_a = block.style) != null ? _a : settings.style,
     minDepth: (_b = block.min_depth) != null ? _b : settings.minDepth,
@@ -45,7 +47,9 @@ function mergeConfig(settings, block) {
     title: (_d = block.title) != null ? _d : settings.title,
     delimiter: (_e = block.delimiter) != null ? _e : settings.delimiter,
     bulletSymbol: (_f = block.bullet_symbol) != null ? _f : settings.bulletSymbol,
-    refs: (_g = block.refs) != null ? _g : settings.refs
+    refs: (_g = block.refs) != null ? _g : settings.refs,
+    quickLinks: (_h = block.quick_links) != null ? _h : settings.quickLinks,
+    quickLinkPrefix: (_i = block.quick_link_prefix) != null ? _i : settings.quickLinkPrefix
   };
 }
 
@@ -100,6 +104,14 @@ var SettingsTab = class extends import_obsidian.PluginSettingTab {
       this.plugin.settings.refs = value;
       await this.plugin.saveSettings();
     }));
+    new import_obsidian.Setting(displayGroup).setName("Quick links").setDesc("Show -- [[Note]] quick links as TOC children").addDropdown((dropdown) => dropdown.addOption("show", "Show quick links").addOption("hide", "Hide quick links").setValue(this.plugin.settings.quickLinks).onChange(async (value) => {
+      this.plugin.settings.quickLinks = value;
+      await this.plugin.saveSettings();
+    }));
+    new import_obsidian.Setting(displayGroup).setName("Quick link prefix").setDesc('Symbol shown before quick links (e.g., "\u2192" or "\u2022")').addText((text) => text.setValue(this.plugin.settings.quickLinkPrefix).setPlaceholder("\u2192").onChange(async (value) => {
+      this.plugin.settings.quickLinkPrefix = value;
+      await this.plugin.saveSettings();
+    }));
   }
   createSettingGroup(containerEl) {
     return containerEl.createDiv({ cls: "setting-item-group" });
@@ -111,6 +123,8 @@ var import_obsidian2 = require("obsidian");
 
 // src/parser.ts
 var REF_PATTERN = /\+\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
+var QUICK_LINK_LINE_PATTERN = /^--\s*\[\[([^\]|]+)(?:\|([^\]]+))?\]\]\s*$/;
+var QUICK_LINK_INLINE_PATTERN = /--\s*\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g;
 function parseHeadings(cache) {
   if (!(cache == null ? void 0 : cache.headings)) {
     return [];
@@ -119,7 +133,8 @@ function parseHeadings(cache) {
     level: h.level,
     heading: h.heading,
     line: h.position.start.line,
-    refs: []
+    refs: [],
+    quickLinks: []
   }));
 }
 function parseHeadingsWithRefs(cache, fileContent) {
@@ -127,20 +142,58 @@ function parseHeadingsWithRefs(cache, fileContent) {
     return [];
   }
   const lines = fileContent.split("\n");
-  return cache.headings.map((h) => {
+  const headings = cache.headings;
+  return headings.map((h, index) => {
     const lineContent = lines[h.position.start.line] || "";
     const refs = parseRefsFromLine(lineContent);
-    const cleanHeading = stripRefs(h.heading);
+    const inlineQuickLinks = parseInlineQuickLinks(h.heading);
+    const cleanHeading = stripRefsAndQuickLinks(h.heading);
+    const nextHeadingLine = index < headings.length - 1 ? headings[index + 1].position.start.line : lines.length;
+    const lineQuickLinks = parseQuickLinks(lines, h.position.start.line + 1, nextHeadingLine);
+    const quickLinks = [...inlineQuickLinks, ...lineQuickLinks];
     return {
       level: h.level,
       heading: cleanHeading,
       line: h.position.start.line,
-      refs
+      refs,
+      quickLinks
     };
   });
 }
-function stripRefs(text) {
-  return text.replace(REF_PATTERN, "").trim();
+function parseQuickLinks(lines, startLine, endLine) {
+  var _a, _b;
+  const quickLinks = [];
+  for (let i = startLine; i < endLine; i++) {
+    const line = (_a = lines[i]) == null ? void 0 : _a.trim();
+    if (!line)
+      continue;
+    const match = line.match(QUICK_LINK_LINE_PATTERN);
+    if (match) {
+      quickLinks.push({
+        path: match[1].trim(),
+        display: (_b = match[2]) == null ? void 0 : _b.trim()
+      });
+    } else {
+      break;
+    }
+  }
+  return quickLinks;
+}
+function parseInlineQuickLinks(text) {
+  var _a;
+  const quickLinks = [];
+  let match;
+  QUICK_LINK_INLINE_PATTERN.lastIndex = 0;
+  while ((match = QUICK_LINK_INLINE_PATTERN.exec(text)) !== null) {
+    quickLinks.push({
+      path: match[1].trim(),
+      display: (_a = match[2]) == null ? void 0 : _a.trim()
+    });
+  }
+  return quickLinks;
+}
+function stripRefsAndQuickLinks(text) {
+  return text.replace(REF_PATTERN, "").replace(QUICK_LINK_INLINE_PATTERN, "").trim();
 }
 function parseRefsFromLine(line) {
   var _a;
@@ -225,6 +278,9 @@ function renderList(headings, config, containerEl) {
     if (config.refs === "show" && heading.refs.length > 0) {
       renderRefs(heading.refs, li);
     }
+    if (config.quickLinks === "show" && heading.quickLinks.length > 0) {
+      renderQuickLinks(heading.quickLinks, li, listTag, config.quickLinkPrefix);
+    }
   }
 }
 function renderInline(headings, config, containerEl) {
@@ -261,6 +317,20 @@ function renderRefs(refs, containerEl) {
     refLink.dataset.refPath = ref.path;
   });
 }
+function renderQuickLinks(quickLinks, parentLi, listTag, prefix) {
+  const nestedList = parentLi.createEl(listTag, { cls: "structured-nav-quick-links" });
+  for (const link of quickLinks) {
+    const li = nestedList.createEl("li", { cls: "structured-nav-quick-link-item" });
+    if (prefix) {
+      li.createSpan({ text: prefix + " ", cls: "structured-nav-quick-link-prefix" });
+    }
+    const linkEl = li.createEl("a", {
+      text: link.display || link.path,
+      cls: "structured-nav-quick-link"
+    });
+    linkEl.dataset.refPath = link.path;
+  }
+}
 
 // src/nav-component.ts
 var NavComponent = class extends import_obsidian2.MarkdownRenderChild {
@@ -296,7 +366,8 @@ var NavComponent = class extends import_obsidian2.MarkdownRenderChild {
     const config = this.getConfig();
     const cache = this.plugin.app.metadataCache.getCache(this.sourcePath);
     let allHeadings;
-    if (config.refs === "show") {
+    const needsContentParsing = config.refs === "show" || config.quickLinks === "show";
+    if (needsContentParsing) {
       const file = this.plugin.app.vault.getAbstractFileByPath(this.sourcePath);
       if (file instanceof import_obsidian2.TFile) {
         const content = await this.plugin.app.vault.cachedRead(file);
@@ -326,6 +397,15 @@ var NavComponent = class extends import_obsidian2.MarkdownRenderChild {
       });
     });
     this.containerEl.querySelectorAll(".structured-nav-ref-link").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const refPath = link.dataset.refPath;
+        if (refPath) {
+          this.openNote(refPath);
+        }
+      });
+    });
+    this.containerEl.querySelectorAll(".structured-nav-quick-link").forEach((link) => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
         const refPath = link.dataset.refPath;

@@ -1,7 +1,7 @@
 {
 	"id": "structured-navigator",
 	"name": "Structured Navigator",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"minAppVersion": "1.0.0",
 	"description": "Dynamic table of contents with cross-note references and scoped views",
 	"author": "Jim Pfaff",

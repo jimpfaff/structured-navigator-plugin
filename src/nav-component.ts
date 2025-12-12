@@ -56,9 +56,10 @@ export class NavComponent extends MarkdownRenderChild {
 		const config = this.getConfig();
 		const cache = this.plugin.app.metadataCache.getCache(this.sourcePath);
 
-		// Get file content for parsing refs if refs are enabled
+		// Get file content for parsing refs/quickLinks if either are enabled
 		let allHeadings;
-		if (config.refs === 'show') {
+		const needsContentParsing = config.refs === 'show' || config.quickLinks === 'show';
+		if (needsContentParsing) {
 			const file = this.plugin.app.vault.getAbstractFileByPath(this.sourcePath);
 			if (file instanceof TFile) {
 				const content = await this.plugin.app.vault.cachedRead(file);
@@ -94,6 +95,17 @@ export class NavComponent extends MarkdownRenderChild {
 
 		// Ref links - open referenced note
 		this.containerEl.querySelectorAll('.structured-nav-ref-link').forEach(link => {
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				const refPath = (link as HTMLElement).dataset.refPath;
+				if (refPath) {
+					this.openNote(refPath);
+				}
+			});
+		});
+
+		// Quick links - open linked note
+		this.containerEl.querySelectorAll('.structured-nav-quick-link').forEach(link => {
 			link.addEventListener('click', (e) => {
 				e.preventDefault();
 				const refPath = (link as HTMLElement).dataset.refPath;

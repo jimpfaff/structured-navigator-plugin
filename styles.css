@@ -159,6 +159,34 @@ ol.structured-nav-outline > li > ol > li > ol > li > ol > li > ol > li > ol > li
 	display: none;
 }
 
+/* Quick links styling */
+.structured-nav-quick-links {
+	margin-top: 0.25em;
+	list-style: none;
+	padding-left: 1.5em;
+}
+
+.structured-nav-quick-link-item {
+	margin: 0.15em 0;
+}
+
+.structured-nav-quick-link-prefix {
+	color: var(--text-muted);
+	font-size: 0.9em;
+}
+
+.structured-nav-quick-link {
+	color: var(--link-color);
+	cursor: pointer;
+	text-decoration: none;
+	font-size: 0.95em;
+}
+
+.structured-nav-quick-link:hover {
+	text-decoration: underline;
+	color: var(--link-color-hover);
+}
+
 /* Settings panel links */
 .structured-nav-settings-links {
 	margin-bottom: 1em;

@@ -6,6 +6,7 @@ export type NavStyle =
 	| 'inline';
 
 export type RefsDisplay = 'show' | 'hide';
+export type QuickLinksDisplay = 'show' | 'hide';
 
 export interface NavSettings {
 	style: NavStyle;
@@ -15,6 +16,8 @@ export interface NavSettings {
 	delimiter: string;
 	bulletSymbol: string;
 	refs: RefsDisplay;
+	quickLinks: QuickLinksDisplay;
+	quickLinkPrefix: string;
 }
 
 export interface NavBlockConfig {
@@ -25,6 +28,8 @@ export interface NavBlockConfig {
 	delimiter?: string;
 	bullet_symbol?: string;
 	refs?: RefsDisplay;
+	quick_links?: QuickLinksDisplay;
+	quick_link_prefix?: string;
 }
 
 export interface NoteRef {
@@ -37,6 +42,7 @@ export interface HeadingItem {
 	heading: string;
 	line: number;
 	refs: NoteRef[];
+	quickLinks: NoteRef[];
 }
 
 export const DEFAULT_SETTINGS: NavSettings = {
@@ -46,7 +52,9 @@ export const DEFAULT_SETTINGS: NavSettings = {
 	title: 'Table of Contents',
 	delimiter: ' | ',
 	bulletSymbol: '',
-	refs: 'show'
+	refs: 'show',
+	quickLinks: 'show',
+	quickLinkPrefix: '→'
 };
 
 /**
@@ -61,5 +69,7 @@ export function mergeConfig(settings: NavSettings, block: NavBlockConfig): NavSe
 		delimiter: block.delimiter ?? settings.delimiter,
 		bulletSymbol: block.bullet_symbol ?? settings.bulletSymbol,
 		refs: block.refs ?? settings.refs,
+		quickLinks: block.quick_links ?? settings.quickLinks,
+		quickLinkPrefix: block.quick_link_prefix ?? settings.quickLinkPrefix,
 	};
 }
