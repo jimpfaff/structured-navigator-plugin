@@ -2,6 +2,34 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## Reference claude global
+
+See also: C:\Users\pfaff\.claude\CLAUDE.md for global guidelines
+
+---
+
+## GitHub Consistency
+
+At the beginning of every session do a
+
+```
+git pull
+```
+
+as these repos are being worked on my Windows and Mac Studio machines
+
+After the end of each session, make sure to perform a
+
+```
+git commit
+```
+
+And push all items to GitHub.
+
+---
+
 ## Project Overview
 
 **Structured Navigator** (`obsidian-structured-navigator`) is an Obsidian plugin for generating dynamic tables of contents with cross-note references and scoped views.
