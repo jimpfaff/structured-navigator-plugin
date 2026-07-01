@@ -126,3 +126,16 @@ Obsidian 1.11.0 announced a new `SettingGroup` API for organizing plugin setting
 - https://github.com/obsidianmd/obsidian-api (for updated `obsidian.d.ts`)
 - https://docs.obsidian.md/Plugins/User+interface/Settings (for official documentation)
 - https://obsidian.md/changelog/ (for release notes)
+
+
+---
+
+## Linting Standards (JavaScript/TypeScript)
+
+- **JS1:** const by default; let only when reassignment needed; never var
+- **JS2:** Explicit return types on exported functions (TypeScript)
+- **JS3:** No `any` type — use `unknown` + type guards
+- **JS4:** Optional chaining (`?.`) and nullish coalescing (`??`)
+- **JS6:** No console.log in production — console.error only for exceptions
+
+Linter: `eslint .` — config in .eslintrc.json
